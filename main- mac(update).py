@@ -2,6 +2,8 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import os
 import sys
 import pyautogui as auto
@@ -10,13 +12,13 @@ from threading import Thread
 
 def start(input1,input2,input3,input4,input5,input6):
     # Get the correct path to the .crx file after the app is bundled
-    if hasattr(sys, '_MEIPASS'):
-        crx_path = os.path.join(sys._MEIPASS, 'extension.crx')
-    else:
-        crx_path = '/Users/abhinavtyagi/Documents/automation_product_code/extension.crx'
+    # if hasattr(sys, '_MEIPASS'):
+    #     crx_path = os.path.join(sys._MEIPASS, 'extension.crx')
+    # else:
+    #     crx_path = 'your extension path'  # add your extension path
 
     options = Options()
-    options.add_extension(crx_path)
+    options.add_extension("extension.crx")
     driver = Chrome(options=options)
     driver.get('https://www.cpwshop.com/home.page')
     driver.maximize_window()
@@ -63,6 +65,7 @@ def start(input1,input2,input3,input4,input5,input6):
     time.sleep(1)
     def keepcheckingcart():
         while True:
+            time.sleep(0.2)
             try:
                 anchor = driver.find_elements(By.TAG_NAME,'a')
                 for i in anchor:
@@ -78,44 +81,26 @@ def start(input1,input2,input3,input4,input5,input6):
             time.sleep(3)
             try:
                 auto.click(713,854)
-                time.sleep(5)
-                anchor = driver.find_elements(By.TAG_NAME,'a')
-                for i in anchor:
-                    print(i.text)
-                    if i.text == "Confirm Choices":
-                        i.click()
-                        print("clicked")
-                        break
+                time.sleep(1)
+                confirm_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.LINK_TEXT, "Confirm Choices")))
+                confirm_button.click()  # Click the "Confirm Choices" button
+                print("Button clicked successfully.")
             except:
-                anchor = driver.find_elements(By.TAG_NAME,'a')
-                for i in anchor:
-                    print(i.text)
-                    if i.text == "Confirm Choices":
-                        i.click()
-                        print("clicked")
-                        break
-                anchor = driver.find_elements(By.TAG_NAME,'a')
-                for i in anchor:
-                    if i.text == "Add to Cart":
-                        i.click()
-                            
-            time.sleep(4)
+                pass                            
             count = count + 1
         else:
             auto.click(713,854)
-            time.sleep(5)
-            anchor = driver.find_elements(By.TAG_NAME,'a')
+            time.sleep(1)
             try:
-                for i in anchor:
-                    print(i.text)
-                    if i.text == "Confirm Choices":
-                        i.click()
-                        print("clicked")
-                        break
-                for i in anchor:
-                    if i.text == "Add to Cart":
-                        i.click()
+                confirm_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.LINK_TEXT, "Confirm Choices")))
+                confirm_button.click()  # Click the "Confirm Choices" button
+                print("Button clicked successfully.")
             except:
-                print("button is not there solving captcha again")
-                captchabox = driver.find_element(By.ID,'GoogleReCaptchaNextBtnContainer') #Captcha checkbox
-                captchabox.click()
+                try:
+                    # Handle captcha if needed
+                    captchabox = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, 'GoogleReCaptchaNextBtnContainer')))
+                    captchabox.click()  # Click captcha checkbox
+                    print("Captcha clicked, retrying button click.")
+                except Exception as e:
+                    print("Error with captcha:", e)
+
